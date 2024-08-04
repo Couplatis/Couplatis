@@ -6,7 +6,9 @@ authors = [
     {name = "Valublity", email = "2646411177@qq.com"},
     {name = "苏向夜", email = "fu050409@163.com"},
 ]
-dependencies = []
+dependencies = [
+    "torch>=2.4.0",
+]
 requires-python = ">=3.10"
 readme = "README.md"
 license = {text = "MIT"}
@@ -14,3 +16,8 @@ license = {text = "MIT"}
 
 [tool.pdm]
 distribution = true
+
+[[tool.pdm.source]]
+url = "https://download.pytorch.org/whl/cu124"
+verify_ssl = true
+name = "torch"
