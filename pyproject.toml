@@ -1,0 +1,16 @@
+[project]
+name = "couplatis"
+version = "0.1.0"
+description = "A deep learning-based study of the dynamical properties of nonlinear coupled neural networks"
+authors = [
+    {name = "Valublity", email = "2646411177@qq.com"},
+    {name = "苏向夜", email = "fu050409@163.com"},
+]
+dependencies = []
+requires-python = ">=3.10"
+readme = "README.md"
+license = {text = "MIT"}
+
+
+[tool.pdm]
+distribution = true

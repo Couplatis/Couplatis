@@ -1,0 +1,25 @@
+{
+  "name": "couplatis",
+  "version": "0.0.0",
+  "description": "A deep learning-based study of the dynamical properties of nonlinear coupled neural networks",
+  "private": true,
+  "main": "pdm run main.py",
+  "directories": {
+    "lib": "src",
+    "test": "tests"
+  },
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HurryHurryHurry/Couplatis.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HurryHurryHurry/Couplatis/issues"
+  },
+  "homepage": "https://github.com/HurryHurryHurry/Couplatis#readme",
+  "dependencies": {
+    "@changesets/cli": "^2.27.7"
+  }
+}

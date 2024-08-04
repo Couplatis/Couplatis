@@ -1,0 +1,10 @@
+{
+  "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
+  "words": [
+    "couplatis",
+  ],
+  "ignorePaths": [
+    "node_modules/**",
+    "pnpm-lock.yaml"
+  ]
+}
