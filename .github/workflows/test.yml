@@ -42,4 +42,4 @@ jobs:
         run: pdm run pytest --verbose
 
       - name: Integration test
-        run: pnpm run main.py
+        run: pdm run main.py
