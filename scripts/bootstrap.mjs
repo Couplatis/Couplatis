@@ -3,12 +3,18 @@ import chalk from "chalk";
 import fs from "fs";
 import { execSync, spawnSync } from "child_process";
 
+const CPU = process.argv[-1] == "--cpu";
+
 function info(...msgs) {
   console.log(chalk.green("[bootstrap]"), ...msgs);
 }
 
 function error(...msgs) {
   console.error(chalk.red("[error]"), ...msgs);
+}
+
+function warn(...msgs) {
+  console.warn(chalk.yellow("[warning]"), ...msgs);
 }
 
 async function findConda() {
@@ -151,18 +157,27 @@ async function main() {
   info("Conda found at", chalk.yellow(conda));
   info("Checking for PDM installation...");
   await checkPDM();
-  info("Checking CUDA installation...");
-  const cuda = await findCuda();
-  if (!cuda) {
-    error(`CUDA not found. Please install CUDA and try again.`);
-    process.exit(1);
-  }
-  const cudaVersion = getCudaVersion();
-  info("Found CUDA", chalk.greenBright(cudaVersion), "at", chalk.yellow(cuda));
-  if (!validateCudaVersion(cudaVersion)) {
-    error(
-      `CUDA version ${cudaVersion} is not supported. Please install CUDA 12.4 or previous and try again.`
+  if (!CPU) {
+    info("Checking CUDA installation...");
+    const cuda = await findCuda();
+    if (!cuda) {
+      error(`CUDA not found. Please install CUDA and try again.`);
+      process.exit(1);
+    }
+    const cudaVersion = getCudaVersion();
+    info(
+      "Found CUDA",
+      chalk.greenBright(cudaVersion),
+      "at",
+      chalk.yellow(cuda)
     );
+    if (!validateCudaVersion(cudaVersion)) {
+      error(
+        `CUDA version ${cudaVersion} is not supported. Please install CUDA 12.4 or previous and try again.`
+      );
+    }
+  } else {
+    warn("CPU mode enabled, skipping CUDA installation check.");
   }
 
   info("Checking conda environment...");
@@ -203,20 +218,36 @@ async function main() {
   }
   if (!checkTorchEnv()) {
     info("Installing Torch environment...");
+    if (CPU) {
+      warn(
+        "CPU mode enabled, will not install GPU version of Torch environment."
+      );
+    }
     const install = spawnSync(
       "conda",
-      [
-        "install",
-        "pytorch",
-        "torchvision",
-        "torchaudio",
-        `pytorch-cuda=${cudaVersion}`,
-        "-c",
-        "pytorch",
-        "-c",
-        "nvidia",
-        "-y",
-      ],
+      CPU
+        ? [
+            "install",
+            "pytorch",
+            "torchvision",
+            "torchaudio",
+            "cpuonly",
+            "-c",
+            "pytorch",
+            "-y",
+          ]
+        : [
+            "install",
+            "pytorch",
+            "torchvision",
+            "torchaudio",
+            `pytorch-cuda=${getCudaVersion()}`,
+            "-c",
+            "pytorch",
+            "-c",
+            "nvidia",
+            "-y",
+          ],
       {
         encoding: "utf-8",
         stdio: "inherit",
