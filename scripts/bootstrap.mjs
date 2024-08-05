@@ -3,7 +3,7 @@ import chalk from "chalk";
 import fs from "fs";
 import { execSync, spawnSync } from "child_process";
 
-const CPU = process.argv[-1] == "--cpu";
+const CPU = process.argv.includes("--cpu");
 
 function info(...msgs) {
   console.log(chalk.green("[bootstrap]"), ...msgs);
