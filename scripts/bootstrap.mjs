@@ -156,7 +156,7 @@ async function main() {
   info("Checking conda environment...");
   if (!(await checkCondaEnv())) {
     info("Creating conda couplatis virtual environment...");
-    spawnSync("conda", ["create", "-n", "couplatis", "-y"], {
+    spawnSync("conda", ["create", "-n", "couplatis", "python==3.12", "-y"], {
       encoding: "utf-8",
       stdio: "inherit",
     });
@@ -166,6 +166,7 @@ async function main() {
 
   const activate = execSync("conda", ["activate", "couplatis"], {
     encoding: "utf-8",
+    stdio: "inherit"
   });
 
   if ((activate.status ?? 0) !== 0 || !validateCondaEnv()) {
@@ -190,7 +191,7 @@ async function main() {
   }
   if (!checkTorchEnv()) {
     info("Installing Torch environment...");
-    const install = execSync("conda", [
+    const install = spawnSync("conda", [
       "install",
       "pytorch",
       "torchvision",
@@ -200,7 +201,11 @@ async function main() {
       "pytorch",
       "-c",
       "nvidia",
-    ]);
+      "-y",
+    ], {
+      encoding: "utf-8",
+      stdio: "inherit"
+    });
     if ((install.status ?? 0) !== 0) {
       error(install.stderr);
       error(
