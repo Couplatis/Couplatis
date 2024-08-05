@@ -1,0 +1,68 @@
+name: Lint
+
+on:
+  push:
+    branches:
+      - main
+    tags-ignore:
+      - "**"
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: "lint ${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+jobs:
+  lint-cspell:
+    name: Lint CSpell
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: streetsidesoftware/cspell-action@v6
+        with:
+          files: "**"
+          config: .cspell.json
+          strict: true
+          verbose: true
+
+  lint:
+    name: Python Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          auto-update-conda: true
+          activate-environment: couplatis
+          python-version: 3.12
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install Dependencies
+        run: pnpm bootstrap --cpu
+
+      - name: Code Style Check
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src"
+
+      - name: Code Lint
+        run: pdm run pylint src/
+
+      - name: Type Check
+        run: pdm run mypy src/
+
+      - name: Changesets Check
+        run: npx changeset status --since=origin/main

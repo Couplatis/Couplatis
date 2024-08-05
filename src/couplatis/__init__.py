@@ -1,5 +1,11 @@
+"""
+Couplatis
+=========
+
+Couplatis is a deep learning-based study of the dynamical
+properties of nonlinear coupled neural networks.
+"""
+
 import torch
 
-torch.cuda.set_device(0)
-print(torch.cuda.is_available())
-print(torch.__version__)
+MODE = "cuda" if torch.cuda.is_available() else "cpu"

@@ -1,7 +1,10 @@
 import which from "which";
 import chalk from "chalk";
 import fs from "fs";
-import { exec, execSync, spawnSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
+
+const CPU = process.argv.includes("--cpu");
+const RERUN = !process.argv.includes("--no-rerun");
 
 function info(...msgs) {
   console.log(chalk.green("[bootstrap]"), ...msgs);
@@ -11,28 +14,57 @@ function error(...msgs) {
   console.error(chalk.red("[error]"), ...msgs);
 }
 
+function warn(...msgs) {
+  console.warn(chalk.yellow("[warning]"), ...msgs);
+}
+
 async function findConda() {
-  return await which("conda");
+  return await which("conda", {
+    nothrow: true,
+  });
 }
 
 async function findCuda() {
-  return await which("nvcc");
+  return await which("nvcc", {
+    nothrow: true,
+  });
 }
 
 async function findPython() {
-  return await which("python");
+  return await which("python", {
+    nothrow: true,
+  });
 }
 
 async function findPDM() {
-  return await which("pdm");
+  return await which("pdm", {
+    nothrow: true,
+  });
 }
 
 async function findPip() {
-  return await which("pip");
+  return await which("pip", {
+    nothrow: true,
+  });
 }
 
 async function findPipx() {
-  return await which("pipx");
+  return await which("pipx", {
+    nothrow: true,
+  });
+}
+
+async function findShell() {
+  if (process.env.SHELL) {
+    return process.env.SHELL;
+  }
+  const shells = ["pwsh", "powershell", "cmd", "bash", "zsh"];
+
+  for (const shell of shells) {
+    if (await which(shell, { nothrow: true })) {
+      return shell;
+    }
+  }
 }
 
 async function checkPDM() {
@@ -82,13 +114,8 @@ async function checkCondaEnv() {
 }
 
 async function validateCondaEnv() {
-  const condaEnv = JSON.parse(
-    spawnSync("conda", ["env", "list", "--json", "--quiet"], {
-      encoding: "utf-8",
-      stdio: "pipe",
-    }).stdout
-  );
-  return condaEnv.active_prefix_name == "couplatis";
+  const python = await findPython();
+  return python && python.includes("couplatis");
 }
 
 function getCudaVersion() {
@@ -139,18 +166,27 @@ async function main() {
   info("Conda found at", chalk.yellow(conda));
   info("Checking for PDM installation...");
   await checkPDM();
-  info("Checking CUDA installation...");
-  const cuda = await findCuda();
-  if (!cuda) {
-    error(`CUDA not found. Please install CUDA and try again.`);
-    return;
-  }
-  const cudaVersion = getCudaVersion();
-  info("Found CUDA", chalk.greenBright(cudaVersion), "at", chalk.yellow(cuda));
-  if (!validateCudaVersion(cudaVersion)) {
-    error(
-      `CUDA version ${cudaVersion} is not supported. Please install CUDA 12.4 or previous and try again.`
+  if (!CPU) {
+    info("Checking CUDA installation...");
+    const cuda = await findCuda();
+    if (!cuda) {
+      error(`CUDA not found. Please install CUDA and try again.`);
+      process.exit(1);
+    }
+    const cudaVersion = getCudaVersion();
+    info(
+      "Found CUDA",
+      chalk.greenBright(cudaVersion),
+      "at",
+      chalk.yellow(cuda)
     );
+    if (!validateCudaVersion(cudaVersion)) {
+      error(
+        `CUDA version ${cudaVersion} is not supported. Please install CUDA 12.4 or previous and try again.`
+      );
+    }
+  } else {
+    warn("CPU mode enabled, skipping CUDA installation check.");
   }
 
   info("Checking conda environment...");
@@ -162,50 +198,78 @@ async function main() {
     });
     info("Conda couplatis virtual environment created.");
   }
-  info("Activating conda couplatis virtual environment...");
 
-  const activate = execSync("conda", ["activate", "couplatis"], {
-    encoding: "utf-8",
-    stdio: "inherit"
-  });
-
-  if ((activate.status ?? 0) !== 0 || !validateCondaEnv()) {
-    error(activate.stderr);
-    error(
-      "Activation failed. Please check your conda installation and make sure to run",
-      chalk.yellowBright("`conda init`"),
-      "for your shell, if you perhaps this is a mistake, please retry to run",
-      chalk.yellowBright("`pnpm bootstrap`"),
-      "again."
+  info("Validating conda couplatis virtual environment...");
+  if (!(await validateCondaEnv())) {
+    if (!RERUN) {
+      error(
+        "Conda couplatis virtual environment not activated, please activate it and try again."
+      );
+      process.exit(1);
+    }
+    warn(
+      "Conda couplatis virtual environment not activated, activating and retrying..."
     );
-    process.exit(1);
+    const shell = await findShell();
+    if (!shell) {
+      error("Unrecognized shell.");
+      process.exit(1);
+    }
+    const re_run = spawnSync(
+      shell,
+      [
+        "-c",
+        "conda activate couplatis && pnpm bootstrap --no-rerun" + (CPU ? " --cpu" : ""),
+      ],
+      { stdio: "inherit" }
+    );
+    process.exit(re_run.status ?? 0);
   }
 
   info("Checking Torch installation...");
-  const python = await findPython();
-  if (!python || !python.includes("couplatis")) {
+  if (!validateCondaEnv()) {
     error(
-      `Python not found. Perhaps your conda installation is broken, recreate couplatis conda environment manually and try again.`
+      `Couplatis virtual python not found. Perhaps your conda installation is broken, recreate couplatis conda environment manually and try again.`
     );
     process.exit(1);
   }
   if (!checkTorchEnv()) {
     info("Installing Torch environment...");
-    const install = spawnSync("conda", [
-      "install",
-      "pytorch",
-      "torchvision",
-      "torchaudio",
-      `pytorch-cuda=${cudaVersion}`,
-      "-c",
-      "pytorch",
-      "-c",
-      "nvidia",
-      "-y",
-    ], {
-      encoding: "utf-8",
-      stdio: "inherit"
-    });
+    if (CPU) {
+      warn(
+        "CPU mode enabled, will not install GPU version of Torch environment."
+      );
+    }
+    const install = spawnSync(
+      "conda",
+      CPU
+        ? [
+            "install",
+            "pytorch",
+            "torchvision",
+            "torchaudio",
+            "cpuonly",
+            "-c",
+            "pytorch",
+            "-y",
+          ]
+        : [
+            "install",
+            "pytorch",
+            "torchvision",
+            "torchaudio",
+            `pytorch-cuda=${getCudaVersion()}`,
+            "-c",
+            "pytorch",
+            "-c",
+            "nvidia",
+            "-y",
+          ],
+      {
+        encoding: "utf-8",
+        stdio: "inherit",
+      }
+    );
     if ((install.status ?? 0) !== 0) {
       error(install.stderr);
       error(
@@ -227,7 +291,7 @@ async function main() {
   }
   info("Valid Torch installation found.");
   info("Setting up pdm...");
-  fs.writeFileSync(".pdm-python", python, { encoding: "utf-8" });
+  fs.writeFileSync(".pdm-python", await findPython(), { encoding: "utf-8" });
   const pdm = spawnSync("pdm", ["install"], {
     encoding: "utf-8",
     stdio: "pipe",
