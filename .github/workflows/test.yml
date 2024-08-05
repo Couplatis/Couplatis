@@ -6,7 +6,9 @@ on:
       - main
   workflow_call:
 
-concurrency: "test ${{ github.workflow }}-${{ github.ref }}"
+concurrency:
+  group: "test ${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
 
 permissions: write-all
 
@@ -37,4 +39,7 @@ jobs:
         run: pnpm bootstrap --cpu
 
       - name: Run tests
-        run: pdm run pytest
+        run: pdm run pytest --verbose
+
+      - name: Integration test
+        run: pnpm run main.py
