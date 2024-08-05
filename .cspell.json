@@ -2,9 +2,16 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "words": [
     "couplatis",
+    "Cuda",
+    "ensurepath",
+    "nvcc",
+    "pipx",
+    "torchaudio",
+    "torchvision"
   ],
   "ignorePaths": [
     "node_modules/**",
-    "pnpm-lock.yaml"
+    "pnpm-lock.yaml",
+    "pdm.lock"
   ]
 }
