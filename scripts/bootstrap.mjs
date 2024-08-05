@@ -120,6 +120,7 @@ async function validateCondaEnv() {
       stdio: "pipe",
     }).stdout
   );
+  console.log(condaEnv);
   return condaEnv.active_prefix_name == "couplatis";
 }
 
