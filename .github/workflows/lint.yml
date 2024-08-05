@@ -43,9 +43,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install pdm
           pdm install
-    
+
       - name: Code Lint
         run: pylint src/
+
+      - name: Code Style Check
+        uses: psf/black@stable
+        with:
+          options: "--check --verbose"
+          src: "./src"
 
       - name: Type Check
         run: mypy src/

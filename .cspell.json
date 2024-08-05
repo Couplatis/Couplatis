@@ -2,12 +2,16 @@
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "words": [
     "couplatis",
-    "Cuda",
+    "cuda",
     "ensurepath",
     "nvcc",
     "pipx",
     "torchaudio",
-    "torchvision"
+    "torchvision",
+    "Valublity",
+    "mypy",
+    "pylint",
+    "pytest"
   ],
   "ignorePaths": [
     "node_modules/**",
