@@ -32,7 +32,10 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: pnpm bootstrap --cpu
+        run: |
+          conda init bash
+          source ~/.bashrc
+          bash -c "pnpm bootstrap --cpu"
 
       - name: Run tests
         run: pdm run pytest
