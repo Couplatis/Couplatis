@@ -7,6 +7,8 @@ on:
     tags-ignore:
       - "**"
   pull_request:
+    branches:
+      - main
 
 concurrency:
   group: "lint ${{ github.workflow }}-${{ github.ref }}"
@@ -18,8 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - uses: streetsidesoftware/cspell-action@v6
         with:
           files: "**"
@@ -32,8 +32,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: recursive
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
