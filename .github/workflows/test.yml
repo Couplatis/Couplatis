@@ -1,0 +1,29 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**/*.md'
+      - LICENSE
+      - '**/*.gitignore'
+      - .editorconfig
+      - docs/**
+
+concurrency: 'release ${{ github.workflow }}-${{ github.ref }}'
+
+permissions: write-all
+
+jobs:
+  build-and-test:
+    name: Build and Test
+    uses: ./.github/workflows/test.yml
+
+  release:
+    name: Release
+    needs: [build-and-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
