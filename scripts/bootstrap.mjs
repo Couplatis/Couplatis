@@ -53,6 +53,19 @@ async function findPipx() {
   });
 }
 
+async function findShell() {
+  if (process.env.SHELL) {
+    return process.env.SHELL;
+  }
+  const shells = ["pwsh", "powershell", "cmd", "bash", "zsh"];
+
+  for (const shell of shells) {
+    if (await which(shell, { nothrow: true })) {
+      return shell;
+    }
+  }
+}
+
 async function checkPDM() {
   const pdm = await findPDM();
   if (pdm) {
@@ -189,30 +202,30 @@ async function main() {
     });
     info("Conda couplatis virtual environment created.");
   }
-  info("Activating conda couplatis virtual environment...");
 
-  const activate = execSync("conda", ["activate", "couplatis"], {
-    encoding: "utf-8",
-    stdio: "inherit",
-  });
-
-  if ((activate.status ?? 0) !== 0 || !validateCondaEnv()) {
-    error(activate.stderr);
-    error(
-      "Activation failed. Please check your conda installation and make sure to run",
-      chalk.yellowBright("`conda init`"),
-      "for your shell, if you perhaps this is a mistake, please retry to run",
-      chalk.yellowBright("`pnpm bootstrap`"),
-      "again."
+  info("Validating conda couplatis virtual environment...");
+  if (!(await validateCondaEnv())) {
+    warn(
+      "Conda couplatis virtual environment not activated, activating and retrying..."
     );
-    process.exit(1);
+    const shell = await findShell();
+    if (!shell) {
+      error("Unrecognized shell.");
+      process.exit(1);
+    }
+    const re_run = spawnSync(
+      shell,
+      ["-c", "conda activate couplatis && pnpm bootstrap"],
+      { stdio: "inherit" }
+    );
+    process.exit(re_run.status ?? 0);
   }
 
   info("Checking Torch installation...");
   const python = await findPython();
   if (!python || !python.includes("couplatis")) {
     error(
-      `Python not found. Perhaps your conda installation is broken, recreate couplatis conda environment manually and try again.`
+      `Couplatis virtual python not found. Perhaps your conda installation is broken, recreate couplatis conda environment manually and try again.`
     );
     process.exit(1);
   }

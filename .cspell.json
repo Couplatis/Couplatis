@@ -9,6 +9,7 @@
     "nothrow",
     "nvcc",
     "pipx",
+    "pwsh",
     "pylint",
     "pytest",
     "torchaudio",
