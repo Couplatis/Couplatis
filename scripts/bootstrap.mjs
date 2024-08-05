@@ -1,7 +1,7 @@
 import which from "which";
 import chalk from "chalk";
 import fs from "fs";
-import { exec, execSync, spawnSync } from "child_process";
+import { execSync, spawnSync } from "child_process";
 
 function info(...msgs) {
   console.log(chalk.green("[bootstrap]"), ...msgs);
@@ -12,27 +12,39 @@ function error(...msgs) {
 }
 
 async function findConda() {
-  return await which("conda");
+  return await which("conda", {
+    nothrow: true,
+  });
 }
 
 async function findCuda() {
-  return await which("nvcc");
+  return await which("nvcc", {
+    nothrow: true,
+  });
 }
 
 async function findPython() {
-  return await which("python");
+  return await which("python", {
+    nothrow: true,
+  });
 }
 
 async function findPDM() {
-  return await which("pdm");
+  return await which("pdm", {
+    nothrow: true,
+  });
 }
 
 async function findPip() {
-  return await which("pip");
+  return await which("pip", {
+    nothrow: true,
+  });
 }
 
 async function findPipx() {
-  return await which("pipx");
+  return await which("pipx", {
+    nothrow: true,
+  });
 }
 
 async function checkPDM() {
@@ -166,7 +178,7 @@ async function main() {
 
   const activate = execSync("conda", ["activate", "couplatis"], {
     encoding: "utf-8",
-    stdio: "inherit"
+    stdio: "inherit",
   });
 
   if ((activate.status ?? 0) !== 0 || !validateCondaEnv()) {
@@ -191,21 +203,25 @@ async function main() {
   }
   if (!checkTorchEnv()) {
     info("Installing Torch environment...");
-    const install = spawnSync("conda", [
-      "install",
-      "pytorch",
-      "torchvision",
-      "torchaudio",
-      `pytorch-cuda=${cudaVersion}`,
-      "-c",
-      "pytorch",
-      "-c",
-      "nvidia",
-      "-y",
-    ], {
-      encoding: "utf-8",
-      stdio: "inherit"
-    });
+    const install = spawnSync(
+      "conda",
+      [
+        "install",
+        "pytorch",
+        "torchvision",
+        "torchaudio",
+        `pytorch-cuda=${cudaVersion}`,
+        "-c",
+        "pytorch",
+        "-c",
+        "nvidia",
+        "-y",
+      ],
+      {
+        encoding: "utf-8",
+        stdio: "inherit",
+      }
+    );
     if ((install.status ?? 0) !== 0) {
       error(install.stderr);
       error(
