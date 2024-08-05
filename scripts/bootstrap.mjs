@@ -205,6 +205,23 @@ async function main() {
 
   info("Validating conda couplatis virtual environment...");
   if (!(await validateCondaEnv())) {
+    info("Initializing conda couplatis virtual environment...");
+    const activate = spawnSync("conda", ["init"], {
+      stdio: "inherit",
+      encoding: "utf-8",
+      env: process.env,
+    });
+    if ((activate.status ?? 0) !== 0) {
+      error(activate.stderr);
+      error(
+        "Activation failed. Please check your conda installation and make sure to run",
+        chalk.yellowBright("`conda init`"),
+        "for your shell, if you perhaps this is a mistake, please retry to run",
+        chalk.yellowBright("`pnpm bootstrap`"),
+        "again."
+      );
+      process.exit(1);
+    }
     warn(
       "Conda couplatis virtual environment not activated, activating and retrying..."
     );
