@@ -1,4 +1,5 @@
-def test_torch_available():
-    import torch
+import couplatis
 
-    assert torch.cuda.is_available()
+
+def test_torch_env():
+    assert couplatis.torch.__version__.startswith("2.4")
