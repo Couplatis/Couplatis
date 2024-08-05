@@ -16,9 +16,10 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Set up Python
-        uses: actions/setup-python@v4
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
         with:
+          auto-update-conda: true
           python-version: 3.12
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -32,10 +33,7 @@ jobs:
           cache: "pnpm"
 
       - name: Install Dependencies
-        run: |
-          conda init bash
-          source ~/.bashrc
-          bash -c "pnpm bootstrap --cpu"
+        run: pnpm bootstrap --cpu
 
       - name: Run tests
         run: pdm run pytest
