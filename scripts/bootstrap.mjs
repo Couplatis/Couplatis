@@ -155,7 +155,7 @@ async function main() {
   const cuda = await findCuda();
   if (!cuda) {
     error(`CUDA not found. Please install CUDA and try again.`);
-    return;
+    process.exit(1);
   }
   const cudaVersion = getCudaVersion();
   info("Found CUDA", chalk.greenBright(cudaVersion), "at", chalk.yellow(cuda));
