@@ -291,7 +291,7 @@ async function main() {
   }
   info("Valid Torch installation found.");
   info("Setting up pdm...");
-  fs.writeFileSync(".pdm-python", python, { encoding: "utf-8" });
+  fs.writeFileSync(".pdm-python", await findPython(), { encoding: "utf-8" });
   const pdm = spawnSync("pdm", ["install"], {
     encoding: "utf-8",
     stdio: "pipe",
