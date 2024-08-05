@@ -64,7 +64,7 @@ jobs:
         run: pdm run pylint src/
 
       - name: Type Check
-        run: mypy src/
+        run: pdm run mypy src/
 
       - name: Changesets Check
         run: pnpm changeset status
