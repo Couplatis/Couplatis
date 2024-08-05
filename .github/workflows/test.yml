@@ -20,6 +20,7 @@ jobs:
         uses: conda-incubator/setup-miniconda@v3
         with:
           auto-update-conda: true
+          activate-environment: couplatis
           python-version: 3.12
       - name: Setup pnpm
         uses: pnpm/action-setup@v4

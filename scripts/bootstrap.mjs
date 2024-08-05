@@ -4,6 +4,7 @@ import fs from "fs";
 import { execSync, spawnSync } from "child_process";
 
 const CPU = process.argv.includes("--cpu");
+const RERUN = !process.argv.includes("--no-rerun");
 
 function info(...msgs) {
   console.log(chalk.green("[bootstrap]"), ...msgs);
@@ -205,6 +206,12 @@ async function main() {
 
   info("Validating conda couplatis virtual environment...");
   if (!(await validateCondaEnv())) {
+    if (!RERUN) {
+      error(
+        "Conda couplatis virtual environment not activated, please activate it and try again."
+      );
+      process.exit(1);
+    }
     warn(
       "Conda couplatis virtual environment not activated, activating and retrying..."
     );
@@ -217,7 +224,7 @@ async function main() {
       shell,
       [
         "-c",
-        "conda activate couplatis && pnpm bootstrap" + (CPU ? " --cpu" : ""),
+        "conda activate couplatis && pnpm bootstrap --no-rerun" + (CPU ? " --cpu" : ""),
       ],
       { stdio: "inherit" }
     );
