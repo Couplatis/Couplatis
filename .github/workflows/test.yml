@@ -1,29 +1,41 @@
-name: Release
+name: Test
 
 on:
-  push:
+  pull_request:
     branches:
       - main
-    paths-ignore:
-      - '**/*.md'
-      - LICENSE
-      - '**/*.gitignore'
-      - .editorconfig
-      - docs/**
+  workflow_call:
 
-concurrency: 'release ${{ github.workflow }}-${{ github.ref }}'
+concurrency: "test ${{ github.workflow }}-${{ github.ref }}"
 
 permissions: write-all
 
 jobs:
-  build-and-test:
-    name: Build and Test
-    uses: ./.github/workflows/test.yml
-
-  release:
-    name: Release
-    needs: [build-and-test]
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout
         uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+          run_install: false
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Install Dependencies
+        run: pnpm bootstrap
+
+      - name: Run tests
+        run: pdm run pytest
