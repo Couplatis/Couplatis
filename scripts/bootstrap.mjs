@@ -114,14 +114,8 @@ async function checkCondaEnv() {
 }
 
 async function validateCondaEnv() {
-  const condaEnv = JSON.parse(
-    spawnSync("conda", ["env", "list", "--json", "--quiet"], {
-      encoding: "utf-8",
-      stdio: "pipe",
-    }).stdout
-  );
-  console.log(condaEnv);
-  return condaEnv.active_prefix_name == "couplatis";
+  const python = await findPython();
+  return python && python.includes("couplatis");
 }
 
 function getCudaVersion() {
@@ -233,8 +227,7 @@ async function main() {
   }
 
   info("Checking Torch installation...");
-  const python = await findPython();
-  if (!python || !python.includes("couplatis")) {
+  if (!validateCondaEnv()) {
     error(
       `Couplatis virtual python not found. Perhaps your conda installation is broken, recreate couplatis conda environment manually and try again.`
     );
