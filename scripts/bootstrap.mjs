@@ -215,7 +215,10 @@ async function main() {
     }
     const re_run = spawnSync(
       shell,
-      ["-c", "conda activate couplatis && pnpm bootstrap"],
+      [
+        "-c",
+        "conda activate couplatis && pnpm bootstrap" + (CPU ? " --cpu" : ""),
+      ],
       { stdio: "inherit" }
     );
     process.exit(re_run.status ?? 0);
