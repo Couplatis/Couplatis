@@ -3,15 +3,13 @@ name = "couplatis"
 version = "0.1.0"
 description = "A deep learning-based study of the dynamical properties of nonlinear coupled neural networks"
 authors = [
-    {name = "Valublity", email = "2646411177@qq.com"},
-    {name = "苏向夜", email = "fu050409@163.com"},
+    { name = "Valublity", email = "2646411177@qq.com" },
+    { name = "苏向夜", email = "fu050409@163.com" },
 ]
-dependencies = [
-    "torch>=2.4.0",
-]
-requires-python = ">=3.10"
+dependencies = []
+requires-python = ">=3.12"
 readme = "README.md"
-license = {text = "MIT"}
+license = { text = "MIT" }
 
 
 [tool.pdm]
@@ -21,3 +19,6 @@ distribution = true
 url = "https://download.pytorch.org/whl/cu124"
 verify_ssl = true
 name = "torch"
+
+[tool.pdm.dev-dependencies]
+dev = ["pytest>=8.3.2"]
