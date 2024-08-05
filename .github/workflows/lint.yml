@@ -51,7 +51,7 @@ jobs:
           src: "./src"
 
       - name: Code Lint
-        run: pylint src/
+        run: pdm run pylint src/
 
       - name: Type Check
         run: mypy src/
