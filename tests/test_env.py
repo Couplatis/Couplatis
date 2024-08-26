@@ -1,5 +1,5 @@
-import couplatis
+import torch
 
 
 def test_torch_env():
-    assert couplatis.torch.__version__.startswith("2.4")
+    assert torch.__version__.startswith("2.4")
