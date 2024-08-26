@@ -11,9 +11,9 @@ from torch.nn import functional as F
 from couplatis.config import Config
 
 
-
 class EpsNet:
-    """ EpsNet"""
+    """EpsNet"""
+
     def __init__(
         self,
         x_size: int,
@@ -28,9 +28,9 @@ class EpsNet:
         self.x_size = x_size
         self.y_size = y_size
         self.a_size = a_size
-        self.w1 = torch.zeros(y_size, x_size, device=config.device)  
-        self.w2 = torch.zeros(a_size, y_size, device=config.device)  
-        self.b = torch.zeros(y_size, device=config.device)  
+        self.w1 = torch.zeros(y_size, x_size, device=config.device)
+        self.w2 = torch.zeros(a_size, y_size, device=config.device)
+        self.b = torch.zeros(y_size, device=config.device)
         self.alpha = alpha
         self.beta = beta
         self.js_mall = js_mall
@@ -64,15 +64,15 @@ class EpsNet:
     def train(self, batch):
         """train"""
         batch_size = batch[1].shape[0]
-        y = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
-        p = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
-        q = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
+        y = torch.zeros(batch_size, self.y_size, device=self.config.device)  # b, ysize
+        p = torch.zeros(batch_size, self.y_size, device=self.config.device)  # b, ysize
+        q = torch.zeros(batch_size, self.y_size, device=self.config.device)  # b, ysize
         counter = 0
         while True:
             # init
             cnt = 0.0
-            batch[0] = batch[0].to(self.config.device)  
-            batch[1] = batch[1].to(self.config.device)  
+            batch[0] = batch[0].to(self.config.device)
+            batch[1] = batch[1].to(self.config.device)
 
             x = batch[0].view(batch_size, -1)  # b, xsize
             d = batch[1]  # b, 1
@@ -119,9 +119,9 @@ class EpsNet:
     def test(self, batch):
         """test"""
         # init
-        batch[0] = batch[0].to(self.config.device)  
+        batch[0] = batch[0].to(self.config.device)
         batch_size = batch[1].shape[0]
-        y = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
+        y = torch.zeros(batch_size, self.y_size, device=self.config.device)  # b, ysize
 
         cnt = 0
         while True:
@@ -143,7 +143,7 @@ class EpsNet:
 
     def load(self, path):
         """load"""
-        params = torch.load(path, map_location=self.config.device)  
+        params = torch.load(path, map_location=self.config.device)
         self.w1 = params["w1"]
         self.w2 = params["w2"]
         self.b = params["b"]
