@@ -14,6 +14,7 @@ permissions: write-all
 
 jobs:
   test:
+    name: Test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
