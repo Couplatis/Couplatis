@@ -1,10 +1,12 @@
 {
   "$schema": "https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json",
   "words": [
+    "argmax",
     "couplatis",
     "cpuonly",
     "cuda",
     "ensurepath",
+    "loguru",
     "mypy",
     "nothrow",
     "nvcc",
@@ -12,8 +14,11 @@
     "pwsh",
     "pylint",
     "pytest",
+    "softmax",
+    "tensorboard",
     "torchaudio",
     "torchvision",
+    "tqdm",
     "Valublity"
   ],
   "ignorePaths": [
