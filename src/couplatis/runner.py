@@ -1,3 +1,11 @@
+"""
+runner
+"""
+
+import os
+import numpy as np
+import torch
+
 from loguru import logger
 from tqdm import tqdm
 
@@ -6,18 +14,13 @@ from couplatis.model import EpsNet
 from couplatis.utils import get_test_loader, get_train_loader
 
 try:
-    from torch.utils.tensorboard.writer import SummaryWriter
-except:
+    from torch.utils.tensorboard.writer import SummaryWriter  # type: ignore
+except Exception:
     from torch.utils.tensorboard import SummaryWriter  # type: ignore
 
 
-import torch
-import os
-
-import numpy as np
-
-
 def run(config: Config):
+    """run"""
     torch.manual_seed(42)
     train_loader = get_train_loader(config)
     test_loader = get_test_loader(config)
@@ -42,11 +45,11 @@ def run(config: Config):
     ckpt_path = None  # "ckpts/lhy/best_9956.pth"
     ckpt_folder = BASE_DIR.joinpath("data", "ckpts", suffix)
 
-    log_path = BASE_DIR.joinpath("data", "eps_logs", "{}.log".format(suffix))
+    log_path = BASE_DIR.joinpath("data", "eps_logs", f"{suffix}.log")
     logger.add(log_path, level="INFO")
 
     if ckpt_path is not None and os.path.exists(ckpt_path):
-        logger.info("Loading checkpoints {}...".format(ckpt_path))
+        logger.info(f"Loading checkpoints {ckpt_path}...")
         net.load(ckpt_path)
         logger.success(f"Checkpoints {ckpt_path} loaded.")
 
@@ -55,10 +58,10 @@ def run(config: Config):
 
     best_epoch, best_acc = -1, -1
     for epoch_id in range(config.epoch):
-        if (epoch_id + 1) in lr_milestone:
+        if epoch_id + 1 in lr_milestone:
             net.alpha = net.alpha * lr_decay
             net.beta = net.beta * lr_decay
-            logger.info("Learning rate decay to: {} and {}".format(net.alpha, net.beta))
+            logger.info(f"Learning rate decay to: {net.alpha} and {net.beta}")
 
         with tqdm(train_loader) as progress_bar:
             epoch_acc = 0.0
@@ -67,12 +70,11 @@ def run(config: Config):
                 epoch_acc += batch_acc
                 progress_bar.update(1)
                 progress_bar.set_description(
-                    "Epoch: {}, Batch: {}/{}, Train Acc: {:.5f}".format(
-                        epoch_id, batch_id, len(train_loader), batch_acc  # type: ignore
-                    )
+                    f"Epoch: {epoch_id}, Batch: {batch_id}/{len(train_loader)}, Train Acc: {batch_acc:.5f}"
                 )
+
                 epoch_acc /= batch_id + 1
-        ckpt_path = os.path.join(ckpt_folder, "epoch_{}.pth".format(str(epoch_id)))
+        ckpt_path = os.path.join(ckpt_folder, f"epoch_{epoch_id}.pth")
         writer.add_scalar("Train Acc", epoch_acc, epoch_id)
         net.save(ckpt_path)
 
@@ -88,9 +90,8 @@ def run(config: Config):
         if acc >= best_acc:
             best_acc = acc
             best_epoch = epoch_id
-            logger.info("Epoch: %d, Test Acc improved to: %.5f" % (epoch_id, acc))
+            logger.info(f"Epoch: {epoch_id}, Test Acc improved to: {acc:.5f}")
         else:
             logger.info(
-                "Epoch: %d, Test Acc is: %.5f, Best Test Acc is: %.5f in epoch: %d"
-                % (epoch_id, acc, best_acc, best_epoch)
+                f"Epoch: {epoch_id}, Test Acc is: {acc:%.5f}, Best Test Acc is: {best_acc:.5f} in epoch:{best_epoch}"
             )

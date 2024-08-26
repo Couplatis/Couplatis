@@ -1,13 +1,19 @@
+"""
+model
+"""
+
+import torch
+
 from pathlib import Path
 from typing import Union
 from torch.nn import functional as F
 
 from couplatis.config import Config
 
-import torch
 
 
 class EpsNet:
+    """ EpsNet"""
     def __init__(
         self,
         x_size: int,
@@ -22,9 +28,9 @@ class EpsNet:
         self.x_size = x_size
         self.y_size = y_size
         self.a_size = a_size
-        self.w1 = torch.zeros(y_size, x_size, device=config.device)  # type: ignore
-        self.w2 = torch.zeros(a_size, y_size, device=config.device)  # type: ignore
-        self.b = torch.zeros(y_size, device=config.device)  # type: ignore
+        self.w1 = torch.zeros(y_size, x_size, device=config.device)  
+        self.w2 = torch.zeros(a_size, y_size, device=config.device)  
+        self.b = torch.zeros(y_size, device=config.device)  
         self.alpha = alpha
         self.beta = beta
         self.js_mall = js_mall
@@ -34,11 +40,13 @@ class EpsNet:
         torch.nn.init.uniform_(self.w2, -0.1, 0.1)
 
     def neuronDTE(self, gamma, p):
+        """neuronDTE"""
         return (1 - self.eps) * p + self.eps * torch.pow(
             torch.sin(p + torch.cos(p + gamma)), 2
         )
 
     def neuronADE(self, gamma, p, q):
+        """neuronADE"""
         p = (1 - self.eps) * p + self.eps * torch.pow(
             torch.sin(p + torch.cos(p + gamma)), 2
         )
@@ -48,21 +56,23 @@ class EpsNet:
         return [p, q]
 
     def cost(self, pred, label):
+        """cost"""
         J = -pred[range(label.shape[0]), label].log().mean()
         return J
 
     @torch.no_grad()
     def train(self, batch):
+        """train"""
         batch_size = batch[1].shape[0]
-        y = torch.zeros(batch_size, self.y_size, device=self.config.device)  # type: ignore # b, ysize
-        p = torch.zeros(batch_size, self.y_size, device=self.config.device)  # type: ignore # b, ysize
-        q = torch.zeros(batch_size, self.y_size, device=self.config.device)  # type: ignore # b, ysize
+        y = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
+        p = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
+        q = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
         counter = 0
         while True:
             # init
             cnt = 0.0
-            batch[0] = batch[0].to(self.config.device)  # type: ignore
-            batch[1] = batch[1].to(self.config.device)  # type: ignore
+            batch[0] = batch[0].to(self.config.device)  
+            batch[1] = batch[1].to(self.config.device)  
 
             x = batch[0].view(batch_size, -1)  # b, xsize
             d = batch[1]  # b, 1
@@ -107,10 +117,11 @@ class EpsNet:
 
     @torch.no_grad()
     def test(self, batch):
+        """test"""
         # init
-        batch[0] = batch[0].to(self.config.device)  # type: ignore
+        batch[0] = batch[0].to(self.config.device)  
         batch_size = batch[1].shape[0]
-        y = torch.zeros(batch_size, self.y_size, device=self.config.device)  # type: ignore # b, ysize
+        y = torch.zeros(batch_size, self.y_size, device=self.config.device)   # b, ysize
 
         cnt = 0
         while True:
@@ -127,10 +138,12 @@ class EpsNet:
         return a.detach().cpu().numpy()
 
     def save(self, path: Union[Path, str]):
+        """save"""
         torch.save({"w1": self.w1, "b": self.b, "w2": self.w2}, path)
 
     def load(self, path):
-        params = torch.load(path, map_location=self.config.device)  # type: ignore
+        """load"""
+        params = torch.load(path, map_location=self.config.device)  
         self.w1 = params["w1"]
         self.w2 = params["w2"]
         self.b = params["b"]
