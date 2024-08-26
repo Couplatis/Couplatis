@@ -1,4 +1,14 @@
+from loguru import logger
+
 import couplatis
 
-print(couplatis.torch.__version__)
-print(couplatis.MODE)
+
+def main():
+    config = couplatis.config.Config()
+    logger.info(f"Running with config: {config}")
+
+    couplatis.run(config)
+
+
+if __name__ == "__main__":
+    main()
