@@ -40,7 +40,7 @@ def run(config: Config):
     torch.manual_seed(24)
     suffix = "2023020101_epsNet"
     ckpt_path = None  # "ckpts/lhy/best_9956.pth"
-    ckpt_folder = BASE_DIR.joinpath("data", "ckpt", suffix)
+    ckpt_folder = BASE_DIR.joinpath("data", "ckpts", suffix)
 
     log_path = BASE_DIR.joinpath("data", "eps_logs", "{}.log".format(suffix))
     logger.add(log_path, level="INFO")
