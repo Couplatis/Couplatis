@@ -7,7 +7,7 @@ BASE_DIR = Path(".").resolve()
 
 
 class Config:
-    epoch = 100
+    epoch = 1
     batchsize = 256
     num_workers = 0
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
