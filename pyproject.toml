@@ -6,7 +6,9 @@ authors = [
     { name = "Valublity", email = "2646411177@qq.com" },
     { name = "苏向夜", email = "fu050409@163.com" },
 ]
-dependencies = []
+dependencies = [
+    "loguru>=0.7.2",
+]
 requires-python = ">=3.12"
 readme = "README.md"
 license = { text = "MIT" }
