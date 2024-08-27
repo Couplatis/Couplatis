@@ -15,5 +15,4 @@ class Config:
 
     def __repr__(self) -> str:
         """repr"""
-        return f"<Config epoch={self.epoch}, batch_size={self.batchsize},
-          num_workers={self.num_workers}, device={self.device!r}>"
+        return f"<Config epoch={self.epoch}, batch_size={self.batchsize},num_workers={self.num_workers}, device={self.device!r}"
